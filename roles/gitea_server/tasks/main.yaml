@@ -3,7 +3,7 @@
     path: "{{ item.1.split(':')[0] }}"
     state: directory
     mode: "0755"
-  loop: "{{ lookup('ansible.builtin.subelements', gitea_services, 'volumes', {'skip_missing': true}) }}"
+  loop: "{{ gitea_services | subelements('volumes', skip_missing=True) }}"
 
 - name: Create Gitea Quadlets
   ansible.builtin.template:
@@ -12,7 +12,7 @@
     owner: "{{ ansible_user }}"
     mode: "664"
   loop: "{{ gitea_services }}"
-  register: gitea_quadlet_results # <--- Unique name
+  register: gitea_quadlet_results
   notify:
     - Reload systemd User Daemon
     - Restart changed Gitea Services
@@ -24,7 +24,7 @@
     owner: "{{ ansible_user }}"
     mode: "664"
   loop: "{{ runner_services }}"
-  register: runner_quadlet_results # <--- Unique name
+  register: runner_quadlet_results
   notify:
     - Reload systemd User Daemon
     - Restart changed Runner Services

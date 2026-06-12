@@ -11,7 +11,7 @@
     path: "{{ item.1.split(':')[0] }}"
     state: directory
     mode: "0755"
-  loop: "{{ lookup('ansible.builtin.subelements', dns_services, 'volumes', {'skip_missing': true}) }}"
+  loop: "{{ dns_services | subelements('volumes', skip_missing=True) }}"
 
 - name: Create Podman Quadlets
   ansible.builtin.template:
