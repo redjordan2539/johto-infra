@@ -1,0 +1,44 @@
+# {{ ansible_managed }}
+[Unit]
+After=network-online.target
+
+StartLimitBurst=10
+StartLimitIntervalSec=120
+
+[Container]
+ContainerName=adguard
+Image={{ item.image }}
+
+Network=host
+
+AutoUpdate={{ item.auto_update | default('registry') }}
+
+Label=category={{ item.category | default('services') }}
+Label=owner={{ container_owner | default('jdelpilar') }}
+
+HealthCmd=nslookup localhost 127.0.0.1 > /dev/null || exit 1
+HealthInterval=30s
+HealthRetries=3
+HealthTimeout=5s
+
+{% for volume in item.volumes | default([]) %}
+Volume={{ volume }}
+{% endfor %}
+
+Environment=TZ={{ timezone | default('America/Los_Angeles') }}
+{% if item.env is defined %}
+{% for key, value in item.env.items() | sort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+
+{% if item.exec is defined %}
+Exec={{ item.exec }}
+{% endif %}
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

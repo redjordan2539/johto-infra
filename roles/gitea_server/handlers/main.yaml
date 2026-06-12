@@ -1,0 +1,19 @@
+- name: Reload systemd User Daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+  become_user: "{{ ansible_user }}"
+
+- name: Restart changed Gitea Services
+  ansible.builtin.systemd:
+    name: "{{ item.item.name }}"
+    state: restarted
+    scope: user
+  loop: "{{ gitea_quadlet_results.results | selectattr('changed', 'equalto', true) | list }}"
+
+- name: Restart changed Runner Services
+  ansible.builtin.systemd:
+    name: "{{ item.item.name }}"
+    state: restarted
+    scope: user
+  loop: "{{ runner_quadlet_results.results | selectattr('changed', 'equalto', true) | list }}"

@@ -1,0 +1,21 @@
+---
+- name: Common Setup
+  hosts: servers
+  roles:
+    - common
+  tags:
+    - common
+
+- name: DNS Setup
+  hosts: dns_servers
+  roles:
+    - dns_server
+  tags:
+    - dns
+
+- name: Gitea Setup
+  hosts: gitea_servers
+  roles:
+    - gitea_server
+  tags:
+    - gitea

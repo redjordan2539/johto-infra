@@ -1,0 +1,47 @@
+- name: Create Gitea Directories
+  ansible.builtin.file:
+    path: "{{ item.1.split(':')[0] }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ lookup('ansible.builtin.subelements', gitea_services, 'volumes', {'skip_missing': true}) }}"
+
+- name: Create Gitea Quadlets
+  ansible.builtin.template:
+    src: gitea_quadlet.j2
+    dest: "{{ podman_quadlet_base_dir }}/management/{{ item.name }}.container"
+    owner: "{{ ansible_user }}"
+    mode: "664"
+  loop: "{{ gitea_services }}"
+  register: gitea_quadlet_results # <--- Unique name
+  notify:
+    - Reload systemd User Daemon
+    - Restart changed Gitea Services
+
+- name: Create Act Runner Quadlets
+  ansible.builtin.template:
+    src: act_runner_quadlet.j2
+    dest: "{{ podman_quadlet_base_dir }}/management/{{ item.name }}container"
+    owner: "{{ ansible_user }}"
+    mode: "664"
+  loop: "{{ runner_services }}"
+  register: runner_quadlet_results # <--- Unique name
+  notify:
+    - Reload systemd User Daemon
+    - Restart changed Runner Services
+
+- name: Flush Handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Start Gitea Services
+  ansible.builtin.systemd:
+    name: "{{ item.name }}"
+    state: started
+    scope: user
+  loop: "{{ gitea_services }}"
+
+- name: Start Runner Services
+  ansible.builtin.systemd:
+    name: "{{ item.name }}"
+    state: started
+    scope: user
+  loop: "{{ runner_services }}"

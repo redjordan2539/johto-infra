@@ -1,0 +1,57 @@
+---
+- name: Enable systemd Lingering
+  ansible.builtin.file:
+    path: "/var/lib/systemd/linger/{{ ansible_user }}"
+    state: touch
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: Deploy workstation public keys from GitHub
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ github_key_url }}"
+    exclusive: true
+
+- name: Install Podman
+  ansible.builtin.package:
+    name: podman
+    state: present
+  become: true
+
+- name: Start Podman Timer
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    state: started
+    enabled: true
+    scope: user
+
+- name: Start Podman Socket
+  ansible.builtin.systemd:
+    name: podman.socket
+    state: started
+    enabled: true
+    scope: user
+
+- name: Create Podman Config Directory
+  ansible.builtin.file:
+    path: "{{ podman_config_base_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Create Podman Quadlet Directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+  with_items:
+    - "{{ podman_quadlet_base_dir }}/infrastructure"
+    - "{{ podman_quadlet_base_dir }}/management"
+    - "{{ podman_quadlet_base_dir }}/media"
+    - "{{ podman_quadlet_base_dir }}/services"

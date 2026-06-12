@@ -1,0 +1,36 @@
+- name: Allow Binding Port 53
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "53"
+    state: present
+    reload: true
+  become: true
+
+- name: Create DNS Service Directories
+  ansible.builtin.file:
+    path: "{{ item.1.split(':')[0] }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ lookup('ansible.builtin.subelements', dns_services, 'volumes', {'skip_missing': true}) }}"
+
+- name: Create Podman Quadlets
+  ansible.builtin.template:
+    src: adguard_quadlet.j2
+    dest: "{{ podman_quadlet_base_dir }}/management/{{ item.name }}.container"
+    owner: "{{ ansible_user }}"
+    mode: "664"
+  loop: "{{ dns_services }}"
+  register: dns_quadlet_results
+  notify:
+    - Reload systemd User Daemon
+    - Restart changed DNS Services
+
+- name: Flush Handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Start DNS Services
+  ansible.builtin.systemd:
+    name: "{{ item.name }}"
+    state: started
+    scope: user
+  loop: "{{ dns_services }}"

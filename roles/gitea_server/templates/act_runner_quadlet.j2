@@ -1,0 +1,33 @@
+# {{ ansible_managed }}
+[Unit]
+After=network-online.target
+After=adguard.service
+Requires=adguard.service
+
+StartLimitBurst=10
+StartLimitIntervalSec=120
+
+[Container]
+ContainerName={{ item.name }}
+Image={{ item.image }}
+
+Network=management-net
+PodmanArgs=--add-host=git.delpilar.net:172.23.0.2
+
+AutoUpdate=registry
+
+Label=category=management
+Label=owner={{ container_owner | default('jdelpilar') }}
+
+Volume=/run/user/1000/podman/podman.sock:/var/run/docker.sock
+
+Environment=TZ='America/Los_Angeles'
+Environment=GITEA_INSTANCE_URL={{ item.gitea_url }}
+Environment=GITEA_RUNNER_REGISTRATION_TOKEN={{ item.runner_token }}
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

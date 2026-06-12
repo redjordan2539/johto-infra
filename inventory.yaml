@@ -1,0 +1,31 @@
+---
+all:
+  children:
+    servers:
+      hosts:
+        new-bark:
+          ansible_host: 100.64.0.2
+        goldenrod:
+          ansible_host: 100.64.0.1
+    traefik_servers:
+      hosts:
+        new-bark:
+        goldenrod:
+    dns_servers:
+      hosts:
+        new-bark:
+    media_servers:
+      hosts:
+        new-bark:
+    arr_servers:
+      hosts:
+        new-bark:
+    headscale_servers:
+      hosts:
+        goldenrod:
+    vaultwarden_servers:
+      hosts:
+        goldenrod:
+    gitea_servers:
+      hosts:
+        new-bark:

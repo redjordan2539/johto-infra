@@ -1,0 +1,56 @@
+# {{ ansible_managed }}
+[Unit]
+After=network-online.target
+After=adguard.service
+Requires=adguard.service
+
+StartLimitBurst=10
+StartLimitIntervalSec=120
+
+[Container]
+ContainerName={{ item.name }}
+Image={{ item.image }}
+
+Network=management-net
+PublishPort=2222:22
+
+AutoUpdate=registry
+
+Label=category=management
+Label=owner={{ container_owner | default('jdelpilar') }}
+
+{% if item.enable_traefik | default(true) %}
+Label=traefik.enable=true
+Label=traefik.http.routers.{{ item.name }}.rule=Host(`{{ item.subdomain | default(item.name) }}.{{ base_domain | default('delpilar.net') }}`)
+Label=traefik.http.routers.{{ item.name }}.entrypoints={{ item.traefik_entrypoint | default('websecure') }}
+Label=traefik.http.routers.{{ item.name }}.tls.certresolver={{ item.traefik_resolver | default('cloudflare') }}
+Label=traefik.http.services.{{ item.name }}.loadbalancer.server.port={{ item.port | default(80) }}
+Label=traefik.docker.network={{ item.network | default('management-net') }}
+Label=traefik.http.routers.{{ item.name }}.tls=true
+{% endif %}
+
+HealthCmd=curl -f http://localhost:3000/api/healthz
+HealthInterval=30s
+HealthTimeout=10s
+HealthRetries=3
+HealthStartPeriod=30s
+
+{% for volume in item.volumes | default([]) %}
+Volume={{ volume }}
+{% endfor %}
+Volume=/etc/timezone:/etc/timezone:ro
+Volume=/etc/localtime:/etc/localtime:ro
+
+Environment=TZ={{ timezone | default('America/Los_Angeles') }}
+{% if item.env is defined %}
+{% for key, value in item.env.items() | sort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

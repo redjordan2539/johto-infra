@@ -1,0 +1,45 @@
+---
+ansible_user: jdelpilar
+ansible_become_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          66633539643530363735343838646634366161346239366132643762323465323766353230343836
+          3935666665383830383163363938303239656436333061370a323236303436313836616233333639
+          38333035643338643439393335356436356434343135663464353863343134386633346466333838
+          3264376339343239650a383939393663346231386461653738656330336338656436373866306137
+          3961
+
+podman_config_base_dir: /appdata/podman
+podman_quadlet_base_dir: "/home/{{ ansible_user }}/.config/containers/systemd"
+
+dns_services:
+  - name: adguard
+    image: docker.io/adguard/adguardhome:latest
+    category: management
+    volumes:
+      - /appdata/podman/adguard/work:/opt/adguardhome/work
+      - /appdata/podman/adguard/conf:/opt/adguardhome/conf
+
+gitea_services:
+  - name: gitea
+    image: docker.io/gitea/gitea:latest
+    container_owner: jdelpilar
+    subdomain: git
+    domain: delpilar.net
+    port: 3000
+    volumes:
+      - /appdata/podman/gitea/data:/var/lib/gitea
+      - /appdata/podman/gitea/config:/etc/gitea
+
+runner_services:
+  - name: act_runner
+    image: docker.io/gitea/act_runner:nightly
+    container_owner: jdelpilar
+    gitea_url: https://git.delpilar.net
+    runner_token: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          35303036303665376330616430373733363066333332323362623237373262383230316431346338
+          3862636465623436343062316662666531623562353164650a313434633865656634366136643430
+          37653263636535656561613663363165313332323164313365306433363036333437373333316632
+          6563356532323964660a626531303962626236363961356639623263373030663462623235393366
+          36343736663063313933306465626634383863366538343930386335353762663866623535636465
+          3461386532333061323435363366653633613035386363633162
