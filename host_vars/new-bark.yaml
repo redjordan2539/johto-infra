@@ -27,8 +27,7 @@ gitea_services:
     domain: delpilar.net
     port: 3000
     volumes:
-      - /appdata/podman/gitea/data:/var/lib/gitea
-      - /appdata/podman/gitea/config:/etc/gitea
+      - /appdata/podman/gitea/data:/data
 
 runner_services:
   - name: act_runner
