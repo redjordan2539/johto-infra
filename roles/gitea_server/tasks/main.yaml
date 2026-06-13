@@ -20,7 +20,7 @@
 - name: Create Act Runner Quadlets
   ansible.builtin.template:
     src: act_runner_quadlet.j2
-    dest: "{{ podman_quadlet_base_dir }}/management/{{ item.name }}container"
+    dest: "{{ podman_quadlet_base_dir }}/management/{{ item.name }}.container"
     owner: "{{ ansible_user }}"
     mode: "664"
   loop: "{{ runner_services }}"
