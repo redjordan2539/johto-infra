@@ -19,7 +19,9 @@ jobs:
           sudo apt-get install -y ansible ansible-lint
 
       - name: Inject Vault Password
-        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault-pass.txt
+        run: printf "%s" "$VAULT_PASS" > .vault-pass.txt
+        env:
+          VAULT_PASS: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
 
       - name: Lint Playbooks
         run: ansible-lint site.yaml
@@ -49,7 +51,9 @@ jobs:
           ssh-keyscan 100.64.0.1 100.64.0.2 >> ~/.ssh/known_hosts
 
       - name: Inject Vault Password
-        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault-pass.txt
+        run: printf "%s" "$VAULT_PASS" > .vault-pass.txt
+        env:
+          VAULT_PASS: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
 
       - name: Run Ansible Playbook
         run: ansible-playbook site.yaml
