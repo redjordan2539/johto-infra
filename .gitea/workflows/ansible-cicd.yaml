@@ -1,0 +1,55 @@
+name: Johto Infrastructure Pipeline
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  lint:
+    name: Run Ansible Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible and Lint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible ansible-lint
+
+      - name: Inject Vault Password
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault-pass.txt
+
+      - name: Lint Playbooks
+        run: ansible-lint site.yaml
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      - name: Inject SSH Key for Ansible
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ANSIBLE_SSH_KEY }}
+
+      - name: Add Headscale IPs to Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan 100.64.0.1 100.64.0.2 >> ~/.ssh/known_hosts
+
+      - name: Inject Vault Password
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault-pass.txt
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook site.yaml
