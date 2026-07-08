@@ -1,8 +1,6 @@
 # {{ ansible_managed }}
 [Unit]
 After=network-online.target
-After=adguard.service
-Requires=adguard.service
 
 StartLimitBurst=10
 StartLimitIntervalSec=120
@@ -42,6 +40,7 @@ Volume=/etc/timezone:/etc/timezone:ro
 Volume=/etc/localtime:/etc/localtime:ro
 
 Environment=TZ={{ timezone | default('America/Los_Angeles') }}
+Environment=DISABLE_REGISTRATION=true
 {% if item.env is defined %}
 {% for key, value in item.env.items() | sort %}
 Environment={{ key }}={{ value }}
