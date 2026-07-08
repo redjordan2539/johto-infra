@@ -12,6 +12,7 @@
     - dns_server
   tags:
     - dns
+    - core
 
 - name: Gitea Setup
   hosts: gitea_servers
@@ -19,3 +20,4 @@
     - gitea_server
   tags:
     - gitea
+    - core

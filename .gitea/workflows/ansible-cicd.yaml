@@ -56,4 +56,4 @@ jobs:
           VAULT_PASS: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
 
       - name: Run Ansible Playbook
-        run: ansible-playbook site.yaml
+        run: ansible-playbook site.yaml --skip-tags "core"
