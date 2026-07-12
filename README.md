@@ -22,32 +22,42 @@ Below is the directory map for this repo.
 ├── host_vars
 │   ├── goldenrod.yaml
 │   └── new-bark.yaml
+├── infrastructure.code-workspace
 ├── inventory.yaml
 ├── README.md
 ├── roles
+│   ├── backup
+│   │   ├── files
+│   │   ├── handlers
+│   │   ├── tasks
+│   │   └── templates
 │   ├── common
 │   │   └── tasks
-│   │       └── main.yaml
 │   ├── dns_server
 │   │   ├── handlers
-│   │   │   └── main.yaml
 │   │   ├── tasks
-│   │   │   └── main.yaml
 │   │   └── templates
-│   │       └── adguard_quadlet.j2
 │   └── gitea_server
 │       ├── handlers
-│       │   └── main.yaml
 │       ├── tasks
-│       │   └── main.yaml
 │       └── templates
-│           ├── act_runner_quadlet.j2
-│           └── gitea_quadlet.j2
 └── site.yaml
 ````
 
+## Roles
+Below is a list of all roles in this project. 
+Each role has a separate `README.md` that goes in depth about that role and any required variables for that role.
+
+| Role Name | README file | Tags |
+|-----------|-------------|------|
+| Backup |[README.md](roles/backup/README.md)| common, backup|
+| Common |[README.md](roles/common/README.md)| common|
+| DNS Server |[README.md](roles/dns_server/README.md)| dns, core|
+| Gitea Server |[README.md](roles/gitea_server/README.md)| gitea, core|
+
 ## Prerequisites
 
+### Install Tools
 To run this project locally the following tools are required.
 All install commands assume you are running Ubuntu/Debian.
 
@@ -60,6 +70,24 @@ All install commands assume you are running Ubuntu/Debian.
     sudo apt install ansible-lint
     ```
 - SSH access to target nodes
+
+### Global Connection Variables
+This playbook relies globally on `ansible_user` and `ansible_become_pass` for host authentication and privilege escalation. While configured per-host within `host_vars` for this deployment, they can also be defined globally in `group_vars/all.yaml` if your environment uses shared credentials.
+
+> [!WARNING]
+> Any variable marked `# !SENSITIVE` **should not** be stored in plain text under any circumstance.
+
+```yaml
+# (required) The SSH user Ansible utilizes to connect to target nodes.
+# Must have sudo privileges. DO NOT set as root.
+# format: string
+ansible_user:
+
+# (required) The sudo password for the user defined above.
+# format: string
+# !SENSITIVE
+ansible_become_pass:
+```
 
 ## How to Run
 The ultimate goal of this project is a fully automated gitops workflow. 
@@ -95,5 +123,6 @@ Below is a list of all services currently deployed by this project. This list wi
 
 Unless otherwise stated all services are run via rootless podman quadlets.
 
-- Internal DNS (dns_server) - AdguardHome for network wide adblocking and local DNS resoultion
+- Internal DNS (dns_server) - AdguardHome for network wide ad-blocking and local DNS resolution
 - Git Server and CI/CD runner (gitea_server) - Gitea alongside act runner for local git with repo mirroring and local private ci/cd runners
+- Automated Backup (rclone and restic) - Restic using rclone backend to handle automated backups for key directories
