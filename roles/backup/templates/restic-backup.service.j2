@@ -1,0 +1,16 @@
+[Unit]
+Description=Restic Backup: {{ backup_name }}
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Environment=RESTIC_REPOSITORY={{ restic_repo_url }}
+Environment=RESTIC_PASSWORD_FILE={{ restic_password_file }}
+Environment=RCLONE_CONFIG={{ rclone_config_path }}
+
+# Back up the specified paths
+ExecStart=/usr/bin/restic backup {{ backup_paths | join(' ') }}
+
+# Forget/Prune policy
+ExecStartPost=/usr/bin/restic forget --keep-daily {{ keep_daily }} --keep-weekly {{ keep_weekly }}

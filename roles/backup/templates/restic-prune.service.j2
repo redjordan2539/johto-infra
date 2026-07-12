@@ -1,0 +1,12 @@
+[Unit]
+Description=Restic Prune: {{ backup_name }}
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Environment=RESTIC_REPOSITORY={{ restic_repo_url }}
+Environment=RESTIC_PASSWORD_FILE={{ restic_password_file }}
+Environment=RCLONE_CONFIG={{ rclone_config_path }}
+
+ExecStart=/usr/bin/restic prune

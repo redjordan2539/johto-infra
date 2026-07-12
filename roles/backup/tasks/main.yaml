@@ -1,0 +1,69 @@
+---
+
+- name: Install rclone
+  ansible.builtin.package:
+    name: rclone
+    state: present
+  become: true
+
+- name: Install restic
+  ansible.builtin.package:
+    name: restic
+    state: present
+  become: true
+
+- name: Create rclone config dir
+  ansible.builtin.file:
+    path: /etc/rclone
+    state: directory
+    mode: "0700"
+  become: true
+
+- name: Create rclone.conf
+  ansible.builtin.template:
+    src: rclone.conf.j2
+    dest: /etc/rclone/rclone.conf
+    mode: "0700"
+  become: true
+
+- name: Create restic dir
+  ansible.builtin.file:
+    path: /etc/restic
+    state: directory
+    mode: "0600"
+  become: true
+
+- name: Create the restic password file
+  ansible.builtin.copy:
+    content: "{{ restic_password }}"
+    dest: "/etc/restic/password"
+    owner: root
+    group: root
+    mode: '0400'
+  become: true
+
+- name: Template systemd units for restic
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - restic-backup.service
+    - restic-prune.service
+  become: true
+  notify: Reload systemd Daemon
+
+- name: Copy systemd timers
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - restic-backup.timer
+    - restic-prune.timer
+  become: true
+  notify: Enable and start restic timers

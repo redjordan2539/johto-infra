@@ -21,3 +21,11 @@
   tags:
     - gitea
     - core
+
+- name: Setup Backups
+  hosts: all
+  roles:
+    - backup
+  tags:
+    - common
+    - backup

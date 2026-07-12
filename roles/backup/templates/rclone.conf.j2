@@ -1,0 +1,11 @@
+{% for remote in rclone_remotes %}
+[{{ remote.remote_name }}]
+type = drive
+client_id = {{ remote.client_id }}
+client_secret = {{ remote.client_secret }}
+scope = drive
+token = {{ remote.client_auth_token }}
+team_drive = {{ remote.team_drive_id }}
+root_folder_id = 
+
+{% endfor %}
