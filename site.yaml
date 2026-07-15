@@ -29,3 +29,10 @@
   tags:
     - common
     - backup
+
+- name: Minecraft Setup
+  hosts: minecraft_servers
+  roles:
+    - minecraft_server
+  tags:
+    - minecraft

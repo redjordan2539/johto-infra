@@ -29,3 +29,6 @@ all:
     gitea_servers:
       hosts:
         new-bark:
+    minecraft_servers:
+      hosts:
+        new-bark:

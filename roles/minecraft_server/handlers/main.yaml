@@ -1,0 +1,7 @@
+- name: Restart changed Minecraft Services
+  ansible.builtin.systemd:
+    name: "mc-{{ item.item.name }}"
+    state: restarted
+    scope: user
+    daemon_reload: true
+  loop: "{{ minecraft_quadlet_results.results | selectattr('changed', 'equalto', true) | list }}"

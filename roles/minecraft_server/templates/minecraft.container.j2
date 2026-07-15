@@ -1,0 +1,40 @@
+# {{ ansible_managed }}
+[Unit]
+After=network-online.target
+
+StartLimitBurst=10
+StartLimitIntervalSec=120
+
+[Container]
+ContainerName=mc-{{ item.name }}
+Image={{ item.image }}
+
+Network=management-net
+PublishPort={{ item.port | default(mc_port) }}:25565
+
+AutoUpdate=registry
+
+Label=category=management
+Label=owner={{ item.container_owner | default('jdelpilar') }}
+
+Volume={{ podman_config_base_dir }}/mc-{{ item.name }}/data:/data
+{% if item.volumes is defined %}
+{% for volume in item.volumes %}
+Volume={{ volume }}
+{% endfor %}
+{% endif %}
+
+Environment=TZ={{ timezone | default('America/Los_Angeles') }}
+Environment=EULA=true
+{% if item.env is defined %}
+{% for key, value in item.env.items() | sort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

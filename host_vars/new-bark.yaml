@@ -12,6 +12,8 @@ ansible_become_password: !vault |
 podman_config_base_dir: /appdata/podman
 podman_quadlet_base_dir: "/home/{{ ansible_user }}/.config/containers/systemd"
 
+timezone: America/Los_Angeles
+
 dns_services:
   - name: adguard
     image: docker.io/adguard/adguardhome:latest
@@ -237,3 +239,14 @@ backup_paths:
   - /storage/public-assets
 keep_daily: 7
 keep_weekly: 4
+
+minecraft_servers:
+  - name: vanilla
+    image: docker.io/itzg/minecraft-server:latest
+    port: 25565
+    env:
+      MEMORY: 4G
+      USE_AIKAR_FLAGS: "true"
+      TYPE: PAPER
+      ENABLE_AUTOPAUSE: "true"
+      OPS: redjordan1
