@@ -1,0 +1,6 @@
+- name: Restart ntfy on Change
+  ansible.builtin.systemd:
+    name: "{{ ntfy_name }}"
+    state: restarted
+    scope: user
+    daemon_reload: true

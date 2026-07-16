@@ -1,0 +1,57 @@
+# {{ ansible_managed }}
+[Unit]
+After=network-online.target
+
+StartLimitBurst=10
+StartLimitIntervalSec=120
+
+[Container]
+ContainerName={{ ntfy_name }}
+Image={{ ntfy_image }}
+
+Network={{ ntfy_network | default('management-net', true) }}
+
+AutoUpdate=registry
+
+Label=category=management
+Label=owner={{ container_owner | default('jdelpilar', true) }}
+
+{% if ntfy_enable_traefik | default(true) %}
+Label=traefik.enable=true
+Label=traefik.http.routers.{{ ntfy_name }}.rule=Host(`{{ ntfy_url | default(ntfy_name + base_domain, true) }}`)
+Label=traefik.http.routers.{{ ntfy_name }}.entrypoints={{ traefik_entrypoint | default('websecure', true) }}
+Label=traefik.http.routers.{{ ntfy_name }}.tls.certresolver={{ traefik_resolver | default('cloudflare', true) }}
+Label=traefik.http.services.{{ ntfy_name }}.loadbalancer.server.port={{ ntfy_port | default(80, true) }}
+Label=traefik.docker.network={{ ntfy_network | default('management-net', true) }}
+Label=traefik.http.routers.{{ ntfy_name }}.tls=true
+{% endif %}
+
+Volume={{ podman_config_base_dir }}/{{ ntfy_name }}/cache:/var/cache/ntfy
+Volume={{ podman_config_base_dir }}/{{ ntfy_name }}/auth:/var/lib/ntfy
+{% if item.volumes is defined %}
+{% for volume in item.volumes %}
+Volume={{ volume }}
+{% endfor %}
+{% endif %}
+
+Environment=TZ={{ timezone | default('America/Los_Angeles') }}
+Environment=NTFY_BASE_URL=https://{{ ntfy_url | default(ntfy_name + base_domain, true) }}
+Environment=NTFY_AUTH_FILE=/var/lib/ntfy/user.db
+Environment=NTFY_AUTH_DEFAULT_ACCESS=deny-all
+Environment=NTFY_ENABLE_LOGIN=true
+Environment=NTFY_REQUIRE_LOGIN=true
+Environment=NTFY_AUTH_USERS="{% for user in ntfy_users %}{{ user['username'] }}:{{ user['pass'] }}:{{ user['level'] }}{{ ',' if not loop.last }}{% endfor %}"
+{% if ntfy_env is defined %}
+{% for key, value in ntfy_env.items() | sort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+
+Exec=serve
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

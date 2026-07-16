@@ -1,0 +1,40 @@
+---
+- name: Create ntfy Directories
+  ansible.builtin.file:
+    path: "{{ podman_config_base_dir }}/{{ ntfy_name }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "/cache"
+    - "/auth"
+
+- name: Create ntfy Quadlet
+  ansible.builtin.template:
+    src: ntfy.container.j2
+    dest: "{{ podman_quadlet_base_dir }}/management/{{ ntfy_name }}.container"
+    owner: "{{ ansible_user }}"
+    mode: "644"
+  notify: Restart ntfy on Change
+
+- name: Flush Handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Start ntfy Servers
+  ansible.builtin.systemd:
+    name: "{{ ntfy_name }}"
+    state: started
+    scope: user
+
+- name: Verify server is running
+  ansible.builtin.uri:
+    url: "https://{{ ntfy_url }}/ansible_test"
+    method: POST
+    body: "Deployment Successful! ntfy is online"
+    url_username: "{{ ntfy_web_user }}"
+    url_password: "{{ ntfy_web_pass }}"
+    force_basic_auth: true
+    status_code: 200
+  register: ntfy_health_check
+  until: ntfy_health_check.status == 200
+  retries: 10
+  delay: 3

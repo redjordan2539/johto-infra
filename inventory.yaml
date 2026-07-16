@@ -32,3 +32,6 @@ all:
     minecraft_servers:
       hosts:
         new-bark:
+    ntfy_servers:
+      hosts:
+        new-bark:

@@ -36,3 +36,11 @@
     - minecraft_server
   tags:
     - minecraft
+
+- name: Ntfy Setup
+  hosts: ntfy_servers
+  roles:
+    - ntfy_server
+  tags:
+    - ntfy
+    - comms

@@ -1,0 +1,9 @@
+---
+ntfy_name: ntfy
+ntfy_image: docker.io/binwiederhier/ntfy
+container_owner: "{{ ansible_user }}"
+ntfy_enable_traefik: true
+ntfy_subdomain: ntfy
+ntfy_port: 80
+ntfy_network: management-net
+ntfy_url: ntfy.delpilar.net
