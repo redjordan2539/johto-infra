@@ -1,0 +1,24 @@
+---
+- name: Create SilverBullet Directory
+  ansible.builtin.file:
+    path: "{{ podman_config_base_dir }}/{{ silverbullet_name }}/space"
+    state: directory
+    mode: "0755"
+
+- name: Create SilverBullet Quadlet
+  ansible.builtin.template:
+    src: silverbullet.container.j2
+    dest: "{{ podman_quadlet_base_dir }}/services/{{ silverbullet_name }}.container"
+    owner: "{{ ansible_user }}"
+    mode: "644"
+  notify: Restart changed Silverbullet Services
+
+- name: Flush Handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Start SilverBullet
+  ansible.builtin.systemd:
+    name: "{{ silverbullet_name }}"
+    state: started
+    scope: user
+    daemon_reload: true

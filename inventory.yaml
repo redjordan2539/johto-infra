@@ -35,3 +35,6 @@ all:
     ntfy_servers:
       hosts:
         new-bark:
+    silverbullet_servers:
+      hosts:
+        new-bark:

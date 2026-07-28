@@ -1,0 +1,6 @@
+- name: Restart changed Silverbullet Services
+  ansible.builtin.systemd:
+    name: "{{ silverbullet_name }}"
+    state: restarted
+    scope: user
+    daemon_reload: true

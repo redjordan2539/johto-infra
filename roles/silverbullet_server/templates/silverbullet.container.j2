@@ -1,0 +1,50 @@
+# {{ ansible_managed }}
+[Unit]
+After=network-online.target
+
+StartLimitBurst=10
+StartLimitIntervalSec=120
+
+[Container]
+ContainerName={{ silverbullet_name }}
+Image={{ silverbullet_image }}
+
+Network=services-net
+PublishPort={{ silverbullet_port }}:3000
+
+AutoUpdate=registry
+
+Label=category=management
+Label=owner={{ container_owner | default('jdelpilar') }}
+
+{% if silverbullet_enable_traefik %}
+Label=traefik.enable=true
+Label=traefik.http.routers.{{ silverbullet_name }}.rule=Host(`{{ silverbullet_url | default(silverbullet_name + "." + base_domain, true) }}`)
+Label=traefik.http.routers.{{ silverbullet_name }}.entrypoints={{ traefik_entrypoint | default('websecure', true) }}
+Label=traefik.http.routers.{{ silverbullet_name }}.tls.certresolver={{ traefik_resolver | default('cloudflare', true) }}
+Label=traefik.http.services.{{ silverbullet_name }}.loadbalancer.server.port={{ silverbullet_port | default(3000, true) }}
+Label=traefik.docker.network=services-net
+Label=traefik.http.routers.{{ silverbullet_name }}.tls=true
+{% endif %}
+
+Volume={{ podman_config_base_dir }}/{{ silverbullet_name }}/space:/space
+{% if silverbullet_volumes is defined %}
+{% for volume in silverbullet_volumes %}
+Volume={{ volume }}
+{% endfor %}
+{% endif %}
+
+Environment=TZ={{ timezone | default('America/Los_Angeles') }}
+Environment=SB_USER={{ silverbullet_user }}:{{ silverbullet_pass }}
+{% if silverbullet_env is defined %}
+{% for key, value in silverbullet_env.items() | sort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

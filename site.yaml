@@ -44,3 +44,11 @@
   tags:
     - ntfy
     - comms
+
+- name: SilverBullet Setup
+  hosts: silverbullet_servers
+  roles:
+    - silverbullet_server
+  tags:
+    - silverbullet
+    - docs
