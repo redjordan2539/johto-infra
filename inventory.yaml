@@ -34,7 +34,7 @@ all:
         new-bark:
     ntfy_servers:
       hosts:
-        new-bark:
+        goldenrod:
     silverbullet_servers:
       hosts:
         new-bark:
