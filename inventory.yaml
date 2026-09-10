@@ -6,7 +6,10 @@ all:
         new-bark:
           ansible_host: 100.64.0.2
         goldenrod:
-          ansible_host: 100.64.0.1
+          ansible_host: 100.64.0.9
+    ubuntu_servers:
+      new-bark:
+      goldenrod:
     traefik_servers:
       hosts:
         new-bark:
