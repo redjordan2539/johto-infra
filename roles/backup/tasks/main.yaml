@@ -1,29 +1,8 @@
 ---
-
-- name: Install rclone
-  ansible.builtin.package:
-    name: rclone
-    state: present
-  become: true
-
 - name: Install restic
   ansible.builtin.package:
     name: restic
     state: present
-  become: true
-
-- name: Create rclone config dir
-  ansible.builtin.file:
-    path: /etc/rclone
-    state: directory
-    mode: "0700"
-  become: true
-
-- name: Create rclone.conf
-  ansible.builtin.template:
-    src: rclone.conf.j2
-    dest: /etc/rclone/rclone.conf
-    mode: "0700"
   become: true
 
 - name: Create restic dir
