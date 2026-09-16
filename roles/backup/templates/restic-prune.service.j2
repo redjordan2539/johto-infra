@@ -5,8 +5,7 @@ After=network-online.target
 [Service]
 Type=oneshot
 User=root
-Environment=RESTIC_REPOSITORY={{ restic_repo_url }}
-Environment=RESTIC_PASSWORD_FILE={{ restic_password_file }}
-Environment=RCLONE_CONFIG={{ rclone_config_path }}
+Environment=RESTIC_REPOSITORY={{ backup_repo_path }}
+Environment=RESTIC_PASSWORD_FILE=/etc/restic/password
 
 ExecStart=/usr/bin/restic prune
