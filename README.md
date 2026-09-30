@@ -1,6 +1,7 @@
 # johto-infra
 The core Ansible project for provisioning and managing the Del Pilar homelab infrastructure
 
+> **Note on Mirroring:** The primary, active source of truth for this repository is hosted on my self-hosted Gitea instance at [git.delpilar.net/jdelpilar/johto-infra](https://git.delpilar.net/jdelpilar/johto-infra). This GitHub repository is an automated downstream mirror for public visibility.
 
 ## Summary
 This contains the primary Ansible configuration-as-code to provision and manage my home infrastructure.
